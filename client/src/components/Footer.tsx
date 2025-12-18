@@ -26,7 +26,7 @@ export default function Footer() {
           <div className="md:col-span-4 space-y-10">
             <div className="space-y-6">
               <h3 className="text-5xl font-bold gradient-text tracking-tight">
-                NOTxRASA
+                RASA
               </h3>
               <p className="text-gray-400 text-base max-w-sm tracking-wide">
                 Created by God, Made in Heaven.
@@ -38,7 +38,7 @@ export default function Footer() {
                 Connect With Us
               </p>
               <div className="flex gap-4">
-                <SocialIcon href="https://instagram.com/notxrasa" icon="instagram" label="Instagram" />
+                <SocialIcon href="https://instagram.com/RASA" icon="instagram" label="Instagram" />
                 <SocialIcon href="mailto:notrasa5@gmail.com" icon="email" label="Email" />
                 <SocialIcon href="#" icon="twitter" label="Twitter" />
               </div>
@@ -114,7 +114,7 @@ export default function Footer() {
         <div className=" pt-12">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
             <p className="text-gray-500 text-center md:text-left tracking-wide">
-              © {currentYear} NOTxRASA. All rights reserved.
+              © {currentYear} RASA. All rights reserved.
               <span className="ml-1">Made with ❤️ for Gen Z</span>
             </p>
 

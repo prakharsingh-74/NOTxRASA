@@ -21,12 +21,12 @@ export default function BrandStory() {
             className="space-y-6"
           >
             <h2 className="mb-8 text-4xl md:text-5xl">
-              About <span className="gradient-text">NOTxRASA</span>
+              About <span className="gradient-text">RASA</span>
             </h2>
             <div className="glass-card p-8 space-y-5">
               <p className="text-lg text-gray-300 leading-relaxed">
                 We are a brand built by the Gen Z to meet the ever-changing styles of the Gen Z. 
-                We at <strong className="text-white font-semibold">NOTxRASA</strong> try to end the nothingness of Gen Z fashion 
+                We at <strong className="text-white font-semibold">RASA</strong> try to end the nothingness of Gen Z fashion 
                 with togetherness of our products.
               </p>
               <p className="text-lg text-gray-300 leading-relaxed">
@@ -49,7 +49,7 @@ export default function BrandStory() {
             <div className="relative rounded-2xl overflow-hidden group border border-white/10 shadow-2xl">
               <Image
                 src="/assets/brand-story-1.png"
-                alt="NOTxRASA Brand Story"
+                alt="RASA Brand Story"
                 width={600}
                 height={400}
                 className="w-full h-auto object-cover transform group-hover:scale-110 transition-transform duration-700"
@@ -135,7 +135,7 @@ export default function BrandStory() {
           <div className="relative rounded-2xl overflow-hidden max-w-9xl mx-auto border border-white/10 shadow-2xl">
             <Image
               src="/assets/brand-story-3.png"
-              alt="Happy Customers - Team NOTxRASA"
+              alt="Happy Customers - Team RASA"
               width={800}
               height={500}
               className="w-full h-auto object-cover"
@@ -148,7 +148,7 @@ export default function BrandStory() {
                   Your smile and you matter most to us and we will do our best to deliver 
                   beautiful smiles with our each product.
                 </p>
-                <p className="text-base text-gray-400 font-medium">Team NOTxRASA</p>
+                <p className="text-base text-gray-400 font-medium">Team RASA</p>
               </div>
             </div>
           </div>

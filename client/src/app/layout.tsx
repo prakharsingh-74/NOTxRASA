@@ -15,12 +15,12 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "NOTxRASA",
+  title: "RASA",
   description: "Premium custom clothing brand offering hoodies, t-shirts, shirts, and more. Upload your design or work with our designers. Created by God, Made in Heaven.",
-  keywords: "custom clothing, hoodies, t-shirts, Gen Z fashion, custom prints, NOTxRASA, apparel",
-  authors: [{ name: "NOTxRASA" }],
+  keywords: "custom clothing, hoodies, t-shirts, Gen Z fashion, custom prints, RASA, apparel",
+  authors: [{ name: "RASA" }],
   openGraph: {
-    title: "NOTxRASA - We Inspire Your Style",
+    title: "RASA - We Inspire Your Style",
     description: "Custom clothing designed for Gen Z. Your design, your story.",
     type: "website",
   },

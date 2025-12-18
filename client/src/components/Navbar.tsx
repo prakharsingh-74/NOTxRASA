@@ -35,12 +35,12 @@ export default function Navbar() {
           >
             <Image
               src="/assets/logo.png"
-              alt="NOTxRASA"
+              alt="RASA"
               width={50}
               height={50}
               className="w-12 h-12 object-contain"
             />
-            <span className="text-xl font-bold font-heading">NOTxRASA</span>
+            <span className="text-xl font-bold font-heading">RASA</span>
           </motion.a>
 
           {/* Desktop Navigation */}

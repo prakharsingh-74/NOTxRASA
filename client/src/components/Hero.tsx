@@ -61,7 +61,7 @@ export default function Hero() {
           <motion.div variants={itemVariants} className="mb-12">
             <Image
               src="/assets/logo.png"
-              alt="NOTxRASA Logo"
+              alt="RASA Logo"
               width={180}
               height={180}
               className="w-48 h-48 object-contain"
