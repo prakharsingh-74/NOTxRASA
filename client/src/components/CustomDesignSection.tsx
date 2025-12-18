@@ -54,6 +54,8 @@ export default function CustomDesignSection() {
           </p>
         </motion.div>
 
+        <div className="h-7" />
+
         {/* Main CTA Cards */}
         <div className="grid md:grid-cols-2 gap-10 mb-56">
           <motion.div
@@ -108,7 +110,7 @@ export default function CustomDesignSection() {
             </div>
           </motion.div>
         </div>
-
+        <div className="h-10" />
         {/* Feature Grid */}
         <motion.div
           className="grid md:grid-cols-4 gap-8"

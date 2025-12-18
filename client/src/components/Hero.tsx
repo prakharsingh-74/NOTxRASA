@@ -136,14 +136,14 @@ export default function Hero() {
 
         {/* Scroll Indicator */}
         <motion.div
-  className="absolute left-1/2 -translate-x-1/2 translate-y-8"
-  animate={{ y: [0, 10, 0] }}
-  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
->
-  <div className="w-6 h-10 border-2 border-red-500 rounded-full flex justify-center p-2">
-    <div className="w-1 h-3 bg-red-500 rounded-full animate-pulse" />
-  </div>
-</motion.div>
+          className="absolute left-1/2 -translate-x-1/2 translate-y-8"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <div className="w-6 h-10 border-2 border-red-500 rounded-full flex justify-center p-2">
+            <div className="w-1 h-3 bg-red-500 rounded-full animate-pulse" />
+          </div>
+        </motion.div>
 
 
       </div>
