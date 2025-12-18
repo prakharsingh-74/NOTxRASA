@@ -94,8 +94,8 @@ export default function CustomDesignSection() {
             <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             <div className="relative z-10">
-              <div className="text-6xl mb-6">🎨</div>
-              <h3 className="text-3xl font-bold mb-4 text-white">Work With Our Designers</h3>
+              <div className="text-6xl mb-6">🛒</div>
+              <h3 className="text-3xl font-bold mb-4 text-white">Visit Our Store</h3>
               <p className="text-gray-400 mb-6 text-lg">
                 Need help bringing your idea to life? Our talented designers 
                 will work with you to create something amazing.

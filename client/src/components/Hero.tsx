@@ -41,7 +41,7 @@ export default function Hero() {
   return (
     <section
       className="relative min-h-screen overflow-hidden"
-      style={{ paddingTop: '96px' }} // navbar-safe offset
+      style={{ paddingTop: '146px' }} 
     >
       {/* Background */}
       <div className="absolute inset-0 z-0">
@@ -85,31 +85,19 @@ export default function Hero() {
 
           <motion.p
             variants={itemVariants}
-            className="text-lg md:text-xl text-gray-400 max-w-5xl px-4"
+            className="text-lg md:text-xl text-gray-400 max-w-5xl px-14"
           >
             Custom clothing designed for Gen Z. From warehouse to your wardrobe —
             we print your dreams on premium apparel.
           </motion.p>
 
           {/* ✅ REAL SPACER — MOVES CTA DOWN */}
-          <div className="h-18 md:h-6" />
+          <div className="h-5 md:h-6" />
 
-          {/* CTA */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-6"
-          >
-            <a href="#custom" className="btn btn-primary">
-              Start Designing
-            </a>
-            <a href="#products" className="btn btn-secondary">
-              Shop Collections
-            </a>
-          </motion.div>
         </motion.div>
 
         {/* ✅ SPACER BETWEEN CTA & CARDS */}
-        <div className="h-32 md:h-9" />
+        <div className="h-12 md:h-9" />
 
         {/* Product Cards */}
         <div className="mt-32 pb-40 flex justify-center lg:pl-24">

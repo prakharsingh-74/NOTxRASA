@@ -148,7 +148,7 @@ export default function BrandStory() {
                   Your smile and you matter most to us and we will do our best to deliver 
                   beautiful smiles with our each product.
                 </p>
-                <p className="text-base text-gray-400 font-medium">- Team NOTxRASA</p>
+                <p className="text-base text-gray-400 font-medium">Team NOTxRASA</p>
               </div>
             </div>
           </div>
