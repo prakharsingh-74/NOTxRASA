@@ -41,7 +41,7 @@ export default function Hero() {
   return (
     <section
       className="relative min-h-screen overflow-hidden"
-      style={{ paddingTop: '146px' }} 
+      style={{ paddingTop: '196px' }} 
     >
       {/* Background */}
       <div className="absolute inset-0 z-0">
@@ -62,9 +62,9 @@ export default function Hero() {
             <Image
               src="/assets/logo.png"
               alt="NOTxRASA Logo"
-              width={120}
-              height={120}
-              className="w-32 h-32 object-contain"
+              width={180}
+              height={180}
+              className="w-48 h-48 object-contain"
               priority
             />
           </motion.div>
@@ -91,36 +91,9 @@ export default function Hero() {
             we print your dreams on premium apparel.
           </motion.p>
 
-          {/* ✅ REAL SPACER — MOVES CTA DOWN */}
           <div className="h-5 md:h-6" />
 
         </motion.div>
-
-        {/* ✅ SPACER BETWEEN CTA & CARDS */}
-        <div className="h-12 md:h-9" />
-
-        {/* Product Cards */}
-        <div className="mt-32 pb-40 flex justify-center lg:pl-24">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 max-w-5xl mx-auto">
-            {[
-              { icon: '👕', label: 'T-Shirts', delay: 0 },
-              { icon: '🧥', label: 'Hoodies', delay: 0.3 },
-              { icon: '👔', label: 'Shirts', delay: 0.6 },
-              { icon: '🎨', label: 'Custom', delay: 0.9 },
-            ].map((item) => (
-              <motion.div
-                key={item.label}
-                variants={floatingVariants}
-                animate="float"
-                style={{ animationDelay: `${item.delay}s` }}
-                className="glass-card p-7 text-center"
-              >
-                <div className="text-4xl mb-4">{item.icon}</div>
-                <p className="text-sm font-semibold">{item.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
 
         {/* Scroll Indicator */}
         <motion.div

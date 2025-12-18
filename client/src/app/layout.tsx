@@ -15,7 +15,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "NOTxRASA - Custom Clothing for Gen Z | Your Design, Your Style",
+  title: "NOTxRASA",
   description: "Premium custom clothing brand offering hoodies, t-shirts, shirts, and more. Upload your design or work with our designers. Created by God, Made in Heaven.",
   keywords: "custom clothing, hoodies, t-shirts, Gen Z fashion, custom prints, NOTxRASA, apparel",
   authors: [{ name: "NOTxRASA" }],
