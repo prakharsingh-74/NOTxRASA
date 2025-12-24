@@ -1,19 +1,20 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import ProductCategories from "@/components/ProductCategories";
-import CustomDesignSection from "@/components/CustomDesignSection";
-import BrandStory from "@/components/BrandStory";
-import Footer from "@/components/Footer";
+import ProductList from "@/components/ProductList";
+import Image from "next/image";
 
-export default function Home() {
+const Homepage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ category: string }>;
+}) => {
+  const category = (await searchParams).category;
   return (
-    <main className="relative">
-      <Navbar />
-      <Hero />
-      <ProductCategories />
-      <CustomDesignSection />
-      <BrandStory />
-      <Footer />
-    </main>
+    <div className="">
+      <div className="relative aspect-[3/1] mb-12">
+        <Image src="/featured.png" alt="Featured Product" fill />
+      </div>
+      <ProductList category={category} params="homepage"/>
+    </div>
   );
-}
+};
+
+export default Homepage;

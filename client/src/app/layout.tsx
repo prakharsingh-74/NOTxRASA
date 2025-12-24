@@ -1,29 +1,23 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { ToastContainer } from "react-toastify";
 
-const inter = Inter({
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
 });
 
-const outfit = Outfit({
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "RASA",
-  description: "Premium custom clothing brand offering hoodies, t-shirts, shirts, and more. Upload your design or work with our designers. Created by God, Made in Heaven.",
-  keywords: "custom clothing, hoodies, t-shirts, Gen Z fashion, custom prints, RASA, apparel",
-  authors: [{ name: "RASA" }],
-  openGraph: {
-    title: "RASA - We Inspire Your Style",
-    description: "Custom clothing designed for Gen Z. Your design, your story.",
-    type: "website",
-  },
+  description: "clothes, customise merchandise",
 };
 
 export default function RootLayout({
@@ -32,9 +26,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
-      <body className="antialiased">
-        {children}
+    <html lang="en">
+      <body
+        className={`₹{geistSans.variable} ₹{geistMono.variable} antialiased`}
+      >
+        <div className="mx-auto p-4 sm:px-0 sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-6xl">
+          <Navbar />
+          {children}
+          <Footer />
+        </div>
+        <ToastContainer position="bottom-right" />
       </body>
     </html>
   );
