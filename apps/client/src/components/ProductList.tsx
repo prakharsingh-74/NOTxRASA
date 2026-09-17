@@ -151,11 +151,17 @@ const fetchData = async ({
   search?: string;
   params: "homepage" | "products";
 }) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL}/products?${category ? `category=${category}` : ""}${search ? `&search=${search}` : ""}&sort=${sort || "newest"}${params === "homepage" ? "&limit=8" : ""}`
-  );
-  const data: ProductType[] = await res.json();
-  return data;
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL}/products?${category ? `category=${category}` : ""}${search ? `&search=${search}` : ""}&sort=${sort || "newest"}${params === "homepage" ? "&limit=8" : ""}`
+    );
+    if (!res.ok) return [];
+    const data: ProductType[] = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    return [];
+  }
 };
 const ProductList = async ({
   category,
