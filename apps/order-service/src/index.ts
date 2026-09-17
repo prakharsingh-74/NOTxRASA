@@ -29,16 +29,24 @@ fastify.register(orderRoute);
 
 const start = async () => {
   try {
-    Promise.all([
-      await connectOrderDB(),
-      await producer.connect(),
-      await consumer.connect(),
-    ]);
+    await connectOrderDB();
+  } catch (err) {
+    console.warn("MongoDB setup warning:", err);
+  }
+
+  try {
+    await producer.connect();
+    await consumer.connect();
     await runKafkaSubscriptions();
+  } catch (err) {
+    console.warn("Kafka connection warning: Kafka cluster may not be running.");
+  }
+
+  try {
     await fastify.listen({ port: 8001 });
     console.log("Order service is running on port 8001");
   } catch (err) {
-    console.log(err);
+    console.error("Order service failed to listen:", err);
     process.exit(1);
   }
 };
