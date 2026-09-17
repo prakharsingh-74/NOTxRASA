@@ -14,7 +14,6 @@ export const connectOrderDB = async () => {
     isConnected = true;
     console.log("Connected to MongoDB");
   } catch (error) {
-    console.log(error);
-    throw error;
+    console.warn("⚠️ Failed to connect to MongoDB. Please ensure MongoDB is running at", process.env.MONGO_URL);
   }
 };
