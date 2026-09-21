@@ -1,8 +1,9 @@
 "use client";
 
+import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-const Filter = () => {
+const FilterContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -28,6 +29,14 @@ const Filter = () => {
         <option value="desc">Price: High to Low</option>
       </select>
     </div>
+  );
+};
+
+const Filter = () => {
+  return (
+    <Suspense fallback={<div className="h-8 w-32 bg-gray-100 rounded my-6 ml-auto animate-pulse" />}>
+      <FilterContent />
+    </Suspense>
   );
 };
 
