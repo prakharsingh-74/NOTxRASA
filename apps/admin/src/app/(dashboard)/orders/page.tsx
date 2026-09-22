@@ -15,10 +15,11 @@ const getData = async (): Promise<OrderType[]> => {
         },
       }
     );
+    if (!res.ok) return [];
     const data = await res.json();
-    return data;
+    return Array.isArray(data) ? data : [];
   } catch (err) {
-    console.log(err);
+    console.error("Failed to fetch orders:", err);
     return [];
   }
 };

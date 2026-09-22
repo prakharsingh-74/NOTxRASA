@@ -16,7 +16,9 @@ const Homepage = async () => {
         Authorization: `Bearer ${token}`,
       },
     }
-  ).then((res) => res.json());
+  )
+    .then((res) => (res.ok ? res.json() : []))
+    .catch(() => []);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
