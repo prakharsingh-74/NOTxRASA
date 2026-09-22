@@ -16,9 +16,14 @@ const categories = [
     slug: "t-shirts",
   },
   {
-    name: "Jackets",
+    name: "Hoodies",
     icon: <Shirt className="w-4 h-4" />,
-    slug: "jackets",
+    slug: "hoodies",
+  },
+  {
+    name: "Oversized",
+    icon: <Shirt className="w-4 h-4" />,
+    slug: "oversized",
   },
   {
     name: "Accessories",
@@ -41,10 +46,10 @@ const CategoriesContent = () => {
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gray-100 p-2 rounded-lg mb-4 text-sm">
+    <div className="grid grid-cols-5 gap-2 bg-gray-100 p-2 rounded-lg mb-4 text-sm overflow-x-auto">
       {categories.map((category) => (
         <div
-          className={`flex items-center justify-center gap-2 cursor-pointer px-2 py-1 rounded-md ${
+          className={`flex items-center justify-center gap-2 cursor-pointer px-2 py-1 rounded-md whitespace-nowrap ${
             category.slug === selectedCategory ? "bg-white" : "text-gray-500"
           }`}
           key={category.name}

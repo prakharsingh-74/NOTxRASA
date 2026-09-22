@@ -102,7 +102,7 @@ const CartContent = () => {
                         Color: {item.selectedColor}
                       </p>
                     </div>
-                    <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-medium">Rs. {(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                 </div>
                 {/* DELETE BUTTON */}
@@ -131,7 +131,7 @@ const CartContent = () => {
             <div className="flex justify-between text-sm">
               <p className="text-gray-500">Subtotal</p>
               <p className="font-medium">
-                $
+                Rs.{" "}
                 {cart
                   .reduce((acc, item) => acc + item.price * item.quantity, 0)
                   .toFixed(2)}
@@ -139,17 +139,17 @@ const CartContent = () => {
             </div>
             <div className="flex justify-between text-sm">
               <p className="text-gray-500">Discount(10%)</p>
-              <p className="font-medium">$ 10</p>
+              <p className="font-medium">Rs. 10</p>
             </div>
             <div className="flex justify-between text-sm">
               <p className="text-gray-500">Shipping Fee</p>
-              <p className="font-medium">$10</p>
+              <p className="font-medium">Rs. 10</p>
             </div>
             <hr className="border-gray-200" />
             <div className="flex justify-between">
               <p className="text-gray-800 font-semibold">Total</p>
               <p className="font-medium">
-                $
+                Rs.{" "}
                 {cart
                   .reduce((acc, item) => acc + item.price * item.quantity, 0)
                   .toFixed(2)}

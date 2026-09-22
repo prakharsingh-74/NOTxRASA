@@ -67,7 +67,7 @@ const CardList = async ({ title }: { title: string }) => {
                     {item.name}
                   </CardTitle>
                 </CardContent>
-                <CardFooter className="p-0">${item.price}K</CardFooter>
+                <CardFooter className="p-0">Rs. {item.price}K</CardFooter>
               </Card>
             ))
           : safeOrders.map((item) => (
@@ -81,7 +81,7 @@ const CardList = async ({ title }: { title: string }) => {
                   </CardTitle>
                   <Badge variant="secondary">{item.status}</Badge>
                 </CardContent>
-                <CardFooter className="p-0">${item.amount / 100}</CardFooter>
+                <CardFooter className="p-0">Rs. {item.amount / 100}</CardFooter>
               </Card>
             ))}
       </div>

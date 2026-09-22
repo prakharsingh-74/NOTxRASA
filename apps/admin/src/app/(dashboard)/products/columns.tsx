@@ -85,6 +85,10 @@ export const columns: ColumnDef<ProductType>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => {
+      const price = parseFloat(row.getValue("price"));
+      return <div>Rs. {price.toFixed(2)}</div>;
+    },
   },
   {
     accessorKey: "shortDescription",
