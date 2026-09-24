@@ -135,6 +135,7 @@ notxrasa/
 | **Auth Service** | `8003` | `http://localhost:8003` |
 | **Client Application** | `3002` | `http://localhost:3002` |
 | **Admin Panel** | `3003` | `http://localhost:3003` |
+| **Email Service** | `N/A` | `N/A` *(Background Kafka Consumer Worker)* |
 | **Kafka Broker 1** | `9094` | `localhost:9094` |
 | **Kafka Broker 2** | `9095` | `localhost:9095` |
 | **Kafka Broker 3** | `9096` | `localhost:9096` |
@@ -196,8 +197,9 @@ Copy the `.env.example` configurations into actual `.env` files in their respect
 4. **Payment Service (`apps/payment-service/.env`)**
    ```bash
    PORT=8002
-   STRIPE_SECRET_KEY=your_stripe_secret_key
-   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   RAZORPAY_KEY_ID=your_razorpay_key_id
+   RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+   RAZORPAY_WEBHOOK_SECRET=your_razorpay_webhook_secret
    CLERK_SECRET_KEY=your_clerk_secret_key
    CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
    ```
