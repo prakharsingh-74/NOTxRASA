@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   SheetContent,
   SheetDescription,
@@ -58,6 +59,7 @@ const fetchCategories = async () => {
 };
 
 const AddProduct = () => {
+  const [uploadingColor, setUploadingColor] = useState<string | null>(null);
   const form = useForm<z.infer<typeof ProductFormSchema>>({
     resolver: zodResolver(ProductFormSchema),
     defaultValues: {
@@ -94,11 +96,13 @@ const AddProduct = () => {
         }
       );
       if (!res.ok) {
-        throw new Error("Failed to create product!");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create product!");
       }
     },
     onSuccess: () => {
       toast.success("Product created successfully");
+      form.reset();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -114,7 +118,20 @@ const AddProduct = () => {
             <Form {...form}>
               <form
                 className="space-y-8"
-                onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+                onSubmit={form.handleSubmit(
+                  (data) => mutation.mutate(data),
+                  (errors) => {
+                    console.log("Validation errors:", errors);
+                    const errorMessages = Object.values(errors)
+                      .map((err) => err.message)
+                      .filter(Boolean);
+                    if (errorMessages.length > 0) {
+                      toast.error(errorMessages[0]?.toString());
+                    } else {
+                      toast.error("Please fill in all required fields!");
+                    }
+                  }
+                )}
               >
                 <FormField
                   control={form.control}
@@ -186,21 +203,33 @@ const AddProduct = () => {
                     </FormItem>
                   )}
                 />
-                {data && (
-                  <FormField
-                    control={form.control}
-                    name="categorySlug"
-                    render={({ field }) => (
+                <FormField
+                  control={form.control}
+                  name="categorySlug"
+                  render={({ field }) => {
+                    const categoryList: CategoryType[] =
+                      data && Array.isArray(data) && data.length > 0
+                        ? data
+                        : [
+                            { id: 1, name: "T-Shirts", slug: "t-shirts" },
+                            { id: 2, name: "Hoodies", slug: "hoodies" },
+                            { id: 3, name: "Shoes", slug: "shoes" },
+                            { id: 4, name: "Accessories", slug: "accessories" },
+                            { id: 5, name: "Bags", slug: "bags" },
+                            { id: 6, name: "Dresses", slug: "dresses" },
+                          ];
+
+                    return (
                       <FormItem>
                         <FormLabel>Category</FormLabel>
                         <FormControl>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a category" />
                             </SelectTrigger>
                             <SelectContent>
-                              {data.map((cat: CategoryType) => (
-                                <SelectItem key={cat.id} value={cat.slug}>
+                              {categoryList.map((cat: CategoryType) => (
+                                <SelectItem key={cat.id || cat.slug} value={cat.slug}>
                                   {cat.name}
                                 </SelectItem>
                               ))}
@@ -208,13 +237,13 @@ const AddProduct = () => {
                           </Select>
                         </FormControl>
                         <FormDescription>
-                          Enter the category of the product.
+                          Select the category of the product.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-                )}
+                    );
+                  }}
+                />
                 <FormField
                   control={form.control}
                   name="sizes"
@@ -226,7 +255,7 @@ const AddProduct = () => {
                           {sizes.map((size) => (
                             <div className="flex items-center gap-2" key={size}>
                               <Checkbox
-                                id="size"
+                                id={`size-${size}`}
                                 checked={field.value?.includes(size)}
                                 onCheckedChange={(checked) => {
                                   const currentValues = field.value || [];
@@ -239,7 +268,7 @@ const AddProduct = () => {
                                   }
                                 }}
                               />
-                              <label htmlFor="size" className="text-xs">
+                              <label htmlFor={`size-${size}`} className="text-xs">
                                 {size}
                               </label>
                             </div>
@@ -268,7 +297,7 @@ const AddProduct = () => {
                                 key={color}
                               >
                                 <Checkbox
-                                  id="color"
+                                  id={`color-${color}`}
                                   checked={field.value?.includes(color)}
                                   onCheckedChange={(checked) => {
                                     const currentValues = field.value || [];
@@ -282,7 +311,7 @@ const AddProduct = () => {
                                   }}
                                 />
                                 <label
-                                  htmlFor="color"
+                                  htmlFor={`color-${color}`}
                                   className="text-xs flex items-center gap-2"
                                 >
                                   <div
@@ -311,69 +340,97 @@ const AddProduct = () => {
                       <FormLabel>Images</FormLabel>
                       <FormControl>
                         <div className="">
-                          {form.watch("colors")?.map((color) => (
-                            <div
-                              className="mb-4 flex items-center gap-4"
-                              key={color}
-                            >
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className="w-4 h-4 rounded-full"
-                                  style={{ backgroundColor: color }}
-                                />
-                                <span className="text-sm font-medium min-w-[80px]">
-                                  {color}:
-                                </span>
-                              </div>
-                              <Input
-                                type="file"
-                                accept="image/*"
-                                onChange={async (e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    try {
-                                      const formData = new FormData();
-                                      formData.append("file", file);
-                                      formData.append(
-                                        "upload_preset",
-                                        "ecommerce"
-                                      );
+                          {form.watch("colors")?.map((color) => {
+                            const imagesMap = form.watch("images") || {};
+                            const imageUrl = imagesMap[color];
+                            const isUploading = uploadingColor === color;
 
-                                      const res = await fetch(
-                                        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-                                        {
-                                          method: "POST",
-                                          body: formData,
+                            return (
+                              <div
+                                className="mb-4 flex items-center gap-4"
+                                key={color}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-4 h-4 rounded-full"
+                                    style={{ backgroundColor: color }}
+                                  />
+                                  <span className="text-sm font-medium min-w-[80px]">
+                                    {color}:
+                                  </span>
+                                </div>
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  disabled={isUploading}
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      setUploadingColor(color);
+                                      try {
+                                        const formData = new FormData();
+                                        formData.append("file", file);
+                                        formData.append(
+                                          "upload_preset",
+                                          "NOTxRASA"
+                                        );
+
+                                        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+                                        if (!cloudName) {
+                                          throw new Error("Cloudinary cloud name is missing in environment!");
                                         }
-                                      );
-                                      const data = await res.json();
 
-                                      if (data.secure_url) {
-                                        const currentImages =
-                                          form.getValues("images") || {};
-                                        form.setValue("images", {
-                                          ...currentImages,
-                                          [color]: data.secure_url,
-                                        });
+                                        const res = await fetch(
+                                          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                                          {
+                                            method: "POST",
+                                            body: formData,
+                                          }
+                                        );
+                                        const data = await res.json();
+
+                                        if (data.secure_url) {
+                                          const currentImages = form.getValues("images") || {};
+                                          form.setValue(
+                                            "images",
+                                            {
+                                              ...currentImages,
+                                              [color]: data.secure_url,
+                                            },
+                                            { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+                                          );
+                                          toast.success(`Image uploaded for ${color}`);
+                                        } else {
+                                          console.warn("Cloudinary upload failed:", data);
+                                          toast.error(
+                                            data.error?.message || "Upload preset 'ecommerce' not found or unsigned uploads disabled on Cloudinary."
+                                          );
+                                        }
+                                      } catch (error: any) {
+                                        console.error(error);
+                                        toast.error(error.message || "Upload failed!");
+                                      } finally {
+                                        setUploadingColor(null);
                                       }
-                                    } catch (error) {
-                                      console.log(error);
-                                      toast.error("Upload failed!");
                                     }
-                                  }
-                                }}
-                              />
-                              {field.value?.[color] ? (
-                                <span className="text-green-600 text-sm">
-                                  Image selected
-                                </span>
-                              ) : (
-                                <span className="text-red-600 text-sm">
-                                  Image required
-                                </span>
-                              )}
-                            </div>
-                          ))}
+                                  }}
+                                />
+                                {isUploading ? (
+                                  <span className="text-blue-600 text-sm animate-pulse">
+                                    Uploading...
+                                  </span>
+                                ) : imageUrl ? (
+                                  <span className="text-green-600 text-sm font-medium">
+                                    ✓ Image selected
+                                  </span>
+                                ) : (
+                                  <span className="text-red-600 text-sm font-medium">
+                                    Image required
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </FormControl>
                     </FormItem>

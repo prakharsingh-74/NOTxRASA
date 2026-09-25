@@ -58,7 +58,9 @@ export const columns: ColumnDef<ProductType>[] = [
             src={
               (product.images as Record<string, string>)?.[
                 product.colors[0] || ""
-              ] || ""
+              ] ||
+              Object.values((product.images as Record<string, string>) || {})[0] ||
+              "https://images.pexels.com/photos/19090/pexels-photo.jpg"
             }
             alt={product.name}
             fill

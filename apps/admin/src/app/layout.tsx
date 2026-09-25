@@ -25,7 +25,7 @@ export default async function RootLayout({
 }>) {
 
   return (
-    <ClerkProvider>
+    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_YmVsb3ZlZC1raW5nZmlzaC04MjQ1LmNsZXJrLmFjY291bnRzLmRldiQ"}>
       <html lang="en" suppressHydrationWarning>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}

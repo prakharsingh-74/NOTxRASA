@@ -35,13 +35,14 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 const start = async () => {
   try {
     await producer.connect();
-    app.listen(8003, () => {
-      console.log("Auth service is running on 8003");
-    });
   } catch (error) {
-    console.log(error);
-    process.exit(1);
+    console.warn("Kafka connection warning: Kafka cluster may not be running.", error);
   }
+
+  app.listen(8003, () => {
+    console.log("Auth service is running on port 8003");
+  });
 };
 
 start();
+

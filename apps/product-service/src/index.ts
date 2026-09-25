@@ -39,14 +39,16 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 const start = async () => {
   try {
-    Promise.all([await producer.connect(), await consumer.connect()]);
-    app.listen(8000, () => {
-      console.log("Product service is running on 8000");
-    });
+    await producer.connect();
+    await consumer.connect();
   } catch (error) {
-    console.log(error);
-    process.exit(1);
+    console.warn("Kafka connection warning: Kafka cluster may not be running.", error);
   }
+
+  app.listen(8000, () => {
+    console.log("Product service is running on port 8000");
+  });
 };
 
-start()
+start();
+
