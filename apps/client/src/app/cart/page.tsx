@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import ShippingForm from "@/components/ShippingForm";
-import StripePaymentForm from "@/components/StripePaymentForm";
+import RazorpayPaymentForm from "@/components/RazorpayPaymentForm";
 import useCartStore from "@/stores/cartStore";
 import { ShippingFormInputs } from "@repo/types";
 import { ArrowRight, Trash2 } from "lucide-react";
@@ -117,7 +117,7 @@ const CartContent = () => {
           ) : activeStep === 2 ? (
             <ShippingForm setShippingForm={setShippingForm} />
           ) : activeStep === 3 && shippingForm ? (
-            <StripePaymentForm shippingForm={shippingForm} />
+            <RazorpayPaymentForm shippingForm={shippingForm} />
           ) : (
             <p className="text-sm text-gray-500">
               Please fill in the shipping form to continue.

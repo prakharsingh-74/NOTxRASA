@@ -1,20 +1,7 @@
-import { consumer } from "./kafka";
-import { createStripeProduct, deleteStripeProduct } from "./stripeProduct";
+import { consumer } from "./kafka.js";
+import { createRazorpayProduct, deleteRazorpayProduct } from "./razorpayProduct.js";
 
 export const runKafkaSubscriptions = async () => {
-  // consumer.subscribe("product.created", async (message) => {
-  //   const product = message.value;
-  //   console.log("Received message: product.created", product);
-
-  //   await createStripeProduct(product);
-  // });
-  // consumer.subscribe("product.deleted", async (message) => {
-  //   const productId = message.value;
-  //   console.log("Received message: product.deleted", productId);
-
-  //   await deleteStripeProduct(productId);
-  // });
-
   consumer.subscribe([
     {
       topicName: "product.created",
@@ -22,7 +9,7 @@ export const runKafkaSubscriptions = async () => {
         const product = message.value;
         console.log("Received message: product.created", product);
 
-        await createStripeProduct(product);
+        await createRazorpayProduct(product);
       },
     },
     {
@@ -31,7 +18,7 @@ export const runKafkaSubscriptions = async () => {
         const productId = message.value;
         console.log("Received message: product.deleted", productId);
 
-        await deleteStripeProduct(productId);
+        await deleteRazorpayProduct(productId);
       },
     },
   ]);

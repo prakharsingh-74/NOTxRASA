@@ -5,7 +5,7 @@ export type ProductType = Product;
 
 export type ProductsType = ProductType[];
 
-export type StripeProductType = {
+export type RazorpayProductType = {
   id: string;
   name: string;
   price: number;

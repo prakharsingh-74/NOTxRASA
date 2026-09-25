@@ -1,9 +1,7 @@
 import { Hono } from "hono";
-import Stripe from "stripe";
-import stripe from "../utils/stripe";
-import { producer } from "../utils/kafka";
+import crypto from "node:crypto";
+import { producer } from "../utils/kafka.js";
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 const webhookRoute = new Hono();
 
 webhookRoute.get("/", (c) => {
@@ -14,48 +12,44 @@ webhookRoute.get("/", (c) => {
   });
 });
 
-
-webhookRoute.post("/stripe", async (c) => {
+webhookRoute.post("/razorpay", async (c) => {
   const body = await c.req.text();
-  const sig = c.req.header("stripe-signature");
-
-  let event: Stripe.Event;
+  const signature = c.req.header("x-razorpay-signature");
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || "dummy_webhook_secret";
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig!, webhookSecret);
-  } catch (error) {
-    console.log("Webhook verification failed!");
-    return c.json({ error: "Webhook verification failed!" }, 400);
-  }
+    const expectedSignature = crypto
+      .createHmac("sha256", webhookSecret)
+      .update(body)
+      .digest("hex");
 
-  switch (event.type) {
-    case "checkout.session.completed":
-      const session = event.data.object as Stripe.Checkout.Session;
+    if (expectedSignature !== signature) {
+      console.log("Razorpay webhook signature verification failed!");
+      return c.json({ error: "Webhook signature verification failed!" }, 400);
+    }
 
-      const lineItems = await stripe.checkout.sessions.listLineItems(
-        session.id
-      );
-      // TODO: CREATE ORDER
+    const payload = JSON.parse(body);
+
+    if (payload.event === "payment.captured" || payload.event === "order.paid") {
+      const payment = payload.payload.payment.entity;
+      const notes = payment.notes || {};
+
       producer.send("payment.successful", {
         value: {
-          userId: session.client_reference_id,
-          email: session.customer_details?.email,
-          amount: session.amount_total,
-          status: session.payment_status === "paid" ? "success" : "failed",
-          products: lineItems.data.map((item) => ({
-            name: item.description,
-            quantity: item.quantity,
-            price: item.price?.unit_amount,
-          })),
+          userId: notes.userId || "anonymous",
+          email: payment.email || "customer@example.com",
+          amount: payment.amount,
+          status: "success",
+          products: [],
         },
       });
+    }
 
-      break;
-
-    default:
-      break;
+    return c.json({ status: "ok", received: true });
+  } catch (error) {
+    console.error("Razorpay webhook error:", error);
+    return c.json({ error: "Webhook processing error" }, 500);
   }
-  return c.json({ received: true });
 });
 
 export default webhookRoute;
