@@ -67,7 +67,26 @@ sessionRoute.post("/verify-payment", shouldBeUser, async (c) => {
     cart.reduce((acc, item) => acc + item.price * item.quantity, 0) * 100
   );
 
-  // Send payment success event to Kafka for order creation
+  const mappedProducts = cart.map((item) => {
+    let imgUrl = "";
+    if (typeof (item as any).images === "string") {
+      imgUrl = (item as any).images;
+    } else if ((item as any).images && typeof (item as any).images === "object") {
+      const imagesObj = (item as any).images as Record<string, string>;
+      imgUrl = imagesObj[item.selectedColor] || Object.values(imagesObj)[0] || "";
+    } else if ((item as any).image) {
+      imgUrl = (item as any).image;
+    }
+    return {
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      image: imgUrl,
+    };
+  });
+
+  // 1. Try sending payment success event to Kafka for async processing
+  let kafkaSent = false;
   try {
     await producer.send("payment.successful", {
       value: {
@@ -75,15 +94,35 @@ sessionRoute.post("/verify-payment", shouldBeUser, async (c) => {
         email: "customer@example.com",
         amount: totalAmountInPaise,
         status: "success",
-        products: cart.map((item) => ({
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-        })),
+        products: mappedProducts,
       },
     });
+    kafkaSent = true;
   } catch (err) {
-    console.error("Error sending Kafka payment event:", err);
+    console.warn("Kafka cluster offline or event failed. Fallback to direct HTTP order creation...");
+  }
+
+  // 2. If Kafka was not available, create order directly via order-service HTTP API
+  if (!kafkaSent) {
+    try {
+      const authHeader = c.req.header("Authorization");
+      const orderServiceUrl = process.env.ORDER_SERVICE_URL || "http://localhost:8001";
+      await fetch(`${orderServiceUrl}/create-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+        body: JSON.stringify({
+          amount: totalAmountInPaise,
+          status: "success",
+          products: mappedProducts,
+        }),
+      });
+      console.log("Order created successfully via HTTP fallback!");
+    } catch (fallbackErr) {
+      console.error("HTTP order creation fallback error:", fallbackErr);
+    }
   }
 
   return c.json({

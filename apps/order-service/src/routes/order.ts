@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { shouldBeAdmin, shouldBeUser } from "../middleware/authMiddleware";
-import { Order } from "@repo/order-db";
+import { shouldBeAdmin, shouldBeUser } from "../middleware/authMiddleware.js";
+import { Order, connectOrderDB } from "@repo/order-db";
 import { startOfMonth, subMonths } from "date-fns";
 import { OrderChartType } from "@repo/types";
 
@@ -9,8 +9,37 @@ export const orderRoute = async (fastify: FastifyInstance) => {
     "/user-orders",
     { preHandler: shouldBeUser },
     async (request, reply) => {
-      const orders = await Order.find({ userId: request.userId });
-      return reply.send(orders);
+      try {
+        await connectOrderDB();
+        const orders = await Order.find({ userId: request.userId }).sort({ createdAt: -1 });
+        return reply.send(orders || []);
+      } catch (error) {
+        console.error("Error fetching user orders from MongoDB:", error);
+        return reply.status(500).send({ message: "Failed to fetch user orders", error: String(error) });
+      }
+    }
+  );
+
+  fastify.post(
+    "/create-order",
+    { preHandler: shouldBeUser },
+    async (request, reply) => {
+      try {
+        await connectOrderDB();
+        const { amount, products, email, status } = request.body as any;
+        const newOrder = new Order({
+          userId: request.userId,
+          email: email || "customer@example.com",
+          amount,
+          status: status || "success",
+          products,
+        });
+        const savedOrder = await newOrder.save();
+        return reply.status(201).send(savedOrder);
+      } catch (error) {
+        console.error("Error creating order directly:", error);
+        return reply.status(500).send({ message: "Failed to create order", error: String(error) });
+      }
     }
   );
   fastify.get(
