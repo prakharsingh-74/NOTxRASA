@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -10,23 +11,83 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { ProductType } from "@repo/types";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Package, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
-// export type Product = {
-//   id: string | number;
-//   price: number;
-//   name: string;
-//   shortDescription: string;
-//   description: string;
-//   sizes: string[];
-//   colors: string[];
-//   images: Record<string, string>;
-// };
+const ActionCell = ({ product }: { product: ProductType }) => {
+  const { getToken } = useAuth();
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete "${product.name}"?`)) return;
+    setIsDeleting(true);
+    try {
+      const token = await getToken();
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL}/products/${product.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to delete product");
+      }
+
+      toast.success("Product deleted successfully");
+      router.refresh();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to delete product");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem
+          onClick={() => navigator.clipboard.writeText(product.id.toString())}
+          className="cursor-pointer"
+        >
+          Copy product ID
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link href={`/products/${product.id}`}>View product</Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="text-red-600 focus:text-red-600 font-medium cursor-pointer flex items-center gap-2"
+        >
+          <Trash2 className="w-4 h-4 text-red-600" />
+          {isDeleting ? "Deleting..." : "Delete product"}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export const columns: ColumnDef<ProductType>[] = [
   {
@@ -52,16 +113,22 @@ export const columns: ColumnDef<ProductType>[] = [
     header: "Image",
     cell: ({ row }) => {
       const product = row.original;
+      const imageUrl =
+        (product.images as Record<string, string>)?.[product.colors[0] || ""] ||
+        Object.values((product.images as Record<string, string>) || {})[0];
+
+      if (!imageUrl) {
+        return (
+          <div className="w-9 h-9 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground">
+            <Package className="w-4 h-4" />
+          </div>
+        );
+      }
+
       return (
         <div className="w-9 h-9 relative">
           <Image
-            src={
-              (product.images as Record<string, string>)?.[
-                product.colors[0] || ""
-              ] ||
-              Object.values((product.images as Record<string, string>) || {})[0] ||
-              "https://images.pexels.com/photos/19090/pexels-photo.jpg"
-            }
+            src={imageUrl}
             alt={product.name}
             fill
             className="rounded-full object-cover"
@@ -98,33 +165,6 @@ export const columns: ColumnDef<ProductType>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const product = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(product.id.toString())
-              }
-            >
-              Copy product ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link href={`/products/${product.id}`}>View product</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => <ActionCell product={row.original} />,
   },
 ];

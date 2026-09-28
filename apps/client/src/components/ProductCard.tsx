@@ -2,7 +2,7 @@
 
 import useCartStore from "@/stores/cartStore";
 import { ProductType } from "@repo/types";
-import { ShoppingCart } from "lucide-react";
+import { Package, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -39,17 +39,28 @@ const ProductCard = ({ product }: { product: ProductType }) => {
     toast.success("Product added to cart")
   };
 
+  const imageUrl =
+    (product.images as Record<string, string>)?.[productTypes.color] ||
+    Object.values((product.images as Record<string, string>) || {})[0];
+
   return (
     <div className="shadow-lg rounded-lg overflow-hidden">
       {/* IMAGE */}
       <Link href={`/products/${product.id}`}>
-        <div className="relative aspect-[2/3]">
-          <Image
-            src={(product.images as Record<string,string>)?.[productTypes.color] || ""}
-            alt={product.name}
-            fill
-            className="object-cover hover:scale-105 transition-all duration-300"
-          />
+        <div className="relative aspect-[2/3] bg-gray-100 flex items-center justify-center">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={product.name}
+              fill
+              className="object-cover hover:scale-105 transition-all duration-300"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-400 gap-1.5 p-4 text-center">
+              <Package className="w-10 h-10 stroke-[1.5]" />
+              <span className="text-xs font-medium text-gray-400">No Image Available</span>
+            </div>
+          )}
         </div>
       </Link>
       {/* PRODUCT DETAIL */}

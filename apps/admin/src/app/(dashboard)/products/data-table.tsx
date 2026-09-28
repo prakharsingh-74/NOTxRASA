@@ -21,6 +21,10 @@ import {
 import { DataTablePagination } from "@/components/TablePagination";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { ProductType } from "@repo/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -33,6 +37,10 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { getToken } = useAuth();
+  const router = useRouter();
 
   const table = useReactTable({
     data,
@@ -48,13 +56,67 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const handleDeleteSelected = async () => {
+    const selectedRows = table.getSelectedRowModel().rows;
+    if (selectedRows.length === 0) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedRows.length} selected product(s)?`
+      )
+    ) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const token = await getToken();
+      const deletePromises = selectedRows.map((row) => {
+        const product = row.original as ProductType;
+        return fetch(
+          `${process.env.NEXT_PUBLIC_PRODUCT_SERVICE_URL}/products/${product.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      });
+
+      const responses = await Promise.all(deletePromises);
+      const failed = responses.filter((res) => !res.ok);
+
+      if (failed.length > 0) {
+        toast.error(`Failed to delete ${failed.length} product(s)`);
+      } else {
+        toast.success(
+          `${selectedRows.length} product(s) deleted successfully!`
+        );
+      }
+
+      setRowSelection({});
+      router.refresh();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Error deleting products");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="rounded-md border">
       {Object.keys(rowSelection).length > 0 && (
         <div className="flex justify-end">
-          <button className="flex items-center gap-2 bg-red-500 text-white px-2 py-1 text-sm rounded-md m-4 cursor-pointer">
-            <Trash2 className="w-4 h-4"/>
-            Delete Product(s)
+          <button
+            onClick={handleDeleteSelected}
+            disabled={isDeleting}
+            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white px-3 py-1.5 text-sm rounded-md m-4 cursor-pointer transition-all"
+          >
+            <Trash2 className="w-4 h-4" />
+            {isDeleting ? "Deleting..." : "Delete Product(s)"}
           </button>
         </div>
       )}

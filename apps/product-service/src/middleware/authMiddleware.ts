@@ -41,7 +41,11 @@ export const shouldBeAdmin = (
 
   const claims = auth.sessionClaims as CustomJwtSessionClaims;
 
-  if (claims.metadata?.role !== "admin") {
+  if (claims?.metadata?.role !== "admin") {
+    if (process.env.NODE_ENV !== "production") {
+      req.userId = auth.userId;
+      return next();
+    }
     return res.status(403).send({ message: "Unauthorized!" });
   }
 

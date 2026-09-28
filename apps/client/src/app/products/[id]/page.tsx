@@ -1,5 +1,6 @@
 import ProductInteraction from "@/components/ProductInteraction";
 import { ProductType } from "@repo/types";
+import { Package } from "lucide-react";
 import Image from "next/image";
 
 // TEMPORARY
@@ -59,18 +60,27 @@ const ProductPage = async ({
 
   const selectedSize = size || (product.sizes[0] as string);
   const selectedColor = color || (product.colors[0] as string);
+  const imageUrl =
+    (product.images as Record<string, string>)?.[selectedColor] ||
+    Object.values((product.images as Record<string, string>) || {})[0];
+
   return (
     <div className="flex flex-col gap-4 lg:flex-row md:gap-12 mt-12">
       {/* IMAGE */}
-      <div className="w-full lg:w-5/12 relative aspect-[2/3]">
-        <Image
-          src={
-            (product.images as Record<string, string>)?.[selectedColor] || ""
-          }
-          alt={product.name}
-          fill
-          className="object-contain rounded-md"
-        />
+      <div className="w-full lg:w-5/12 relative aspect-[2/3] bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={product.name}
+            fill
+            className="object-contain rounded-md"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-gray-400 gap-2 p-4 text-center">
+            <Package className="w-12 h-12 stroke-[1.5]" />
+            <span className="text-sm font-medium text-gray-400">No Image Available</span>
+          </div>
+        )}
       </div>
       {/* DETAILS */}
       <div className="w-full lg:w-7/12 flex flex-col gap-4">

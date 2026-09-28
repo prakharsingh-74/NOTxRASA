@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { OrderType } from "@repo/types";
 import OrdersListClient from "@/components/OrdersListClient";
 
-const fetchOrders = async (): Promise<OrderType[]> => {
+const fetchOrders = async (): Promise<any[]> => {
   try {
     const { getToken } = await auth();
     const token = await getToken();
