@@ -25,6 +25,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { ProductType } from "@repo/types";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,6 +39,7 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const { getToken } = useAuth();
   const router = useRouter();
@@ -56,17 +58,11 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const selectedCount = Object.keys(rowSelection).length;
+
   const handleDeleteSelected = async () => {
     const selectedRows = table.getSelectedRowModel().rows;
     if (selectedRows.length === 0) return;
-
-    if (
-      !confirm(
-        `Are you sure you want to delete ${selectedRows.length} selected product(s)?`
-      )
-    ) {
-      return;
-    }
 
     setIsDeleting(true);
 
@@ -96,6 +92,7 @@ export function DataTable<TData, TValue>({
         );
       }
 
+      setShowConfirmModal(false);
       setRowSelection({});
       router.refresh();
     } catch (error: any) {
@@ -108,18 +105,19 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="rounded-md border">
-      {Object.keys(rowSelection).length > 0 && (
+      {selectedCount > 0 && (
         <div className="flex justify-end">
           <button
-            onClick={handleDeleteSelected}
+            onClick={() => setShowConfirmModal(true)}
             disabled={isDeleting}
-            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white px-3 py-1.5 text-sm rounded-md m-4 cursor-pointer transition-all"
+            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-3 py-1.5 text-xs font-semibold rounded-md m-4 cursor-pointer transition-all shadow-sm"
           >
             <Trash2 className="w-4 h-4" />
-            {isDeleting ? "Deleting..." : "Delete Product(s)"}
+            Delete Product(s) ({selectedCount})
           </button>
         </div>
       )}
+
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -162,7 +160,17 @@ export function DataTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
+
       <DataTablePagination table={table} />
+
+      <DeleteConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleDeleteSelected}
+        title={`Delete ${selectedCount} selected product(s)?`}
+        description={`Are you sure you want to delete ${selectedCount} product(s)? This action cannot be undone.`}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

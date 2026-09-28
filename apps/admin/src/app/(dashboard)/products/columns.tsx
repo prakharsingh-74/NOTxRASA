@@ -19,14 +19,15 @@ import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 const ActionCell = ({ product }: { product: ProductType }) => {
   const { getToken } = useAuth();
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete "${product.name}"?`)) return;
     setIsDeleting(true);
     try {
       const token = await getToken();
@@ -46,6 +47,7 @@ const ActionCell = ({ product }: { product: ProductType }) => {
       }
 
       toast.success("Product deleted successfully");
+      setShowConfirmModal(false);
       router.refresh();
     } catch (err: any) {
       console.error(err);
@@ -56,36 +58,46 @@ const ActionCell = ({ product }: { product: ProductType }) => {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem
-          onClick={() => navigator.clipboard.writeText(product.id.toString())}
-          className="cursor-pointer"
-        >
-          Copy product ID
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href={`/products/${product.id}`}>View product</Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="text-red-600 focus:text-red-600 font-medium cursor-pointer flex items-center gap-2"
-        >
-          <Trash2 className="w-4 h-4 text-red-600" />
-          {isDeleting ? "Deleting..." : "Delete product"}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() => navigator.clipboard.writeText(product.id.toString())}
+            className="cursor-pointer"
+          >
+            Copy product ID
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link href={`/products/${product.id}`}>View product</Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setShowConfirmModal(true)}
+            className="text-red-600 focus:text-red-600 font-medium cursor-pointer flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4 text-red-600" />
+            Delete product
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DeleteConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleDelete}
+        title={`Delete "${product.name}"?`}
+        description="Are you sure you want to delete this product? It will be removed permanently."
+        isLoading={isDeleting}
+      />
+    </>
   );
 };
 
