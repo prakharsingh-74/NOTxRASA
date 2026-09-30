@@ -61,12 +61,13 @@ const fetchCategories = async () => {
 const AddProduct = () => {
   const [uploadingColor, setUploadingColor] = useState<string | null>(null);
   const form = useForm<z.infer<typeof ProductFormSchema>>({
-    resolver: zodResolver(ProductFormSchema),
+    resolver: zodResolver(ProductFormSchema) as any,
     defaultValues: {
       name: "",
       shortDescription: "",
       description: "",
       price: 0,
+      stock: 10,
       categorySlug: "",
       sizes: [],
       colors: [],
@@ -198,6 +199,29 @@ const AddProduct = () => {
                       </FormControl>
                       <FormDescription>
                         Enter the price of the product.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Pieces (Stock)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter total available pieces (stock) for this product.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

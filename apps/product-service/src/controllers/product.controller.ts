@@ -126,3 +126,46 @@ export const getProduct = async (req: Request, res: Response) => {
 
   return res.status(200).json(product);
 };
+
+export const reduceStock = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { items }: { items: { id: number | string; quantity: number }[] } =
+      req.body;
+
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ message: "Items array is required!" });
+    }
+
+    const updates = items.map(async (item) => {
+      const productId = Number(item.id);
+      const qty = Math.max(1, Number(item.quantity) || 1);
+
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+      });
+
+      if (!product) return null;
+
+      const currentStock = product.stock ?? 10;
+      const newStock = Math.max(0, currentStock - qty);
+
+      return prisma.product.update({
+        where: { id: productId },
+        data: { stock: newStock },
+      });
+    });
+
+    const updatedProducts = await Promise.all(updates);
+
+    return res.status(200).json({
+      message: "Stock updated successfully",
+      updatedProducts: updatedProducts.filter(Boolean),
+    });
+  } catch (error) {
+    next(error);
+  }
+};

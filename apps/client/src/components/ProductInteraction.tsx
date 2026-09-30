@@ -29,9 +29,15 @@ const ProductInteraction = ({
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  const stock = product.stock ?? 10;
+
   const handleQuantityChange = (type: "increment" | "decrement") => {
     if (type === "increment") {
-      setQuantity((prev) => prev + 1);
+      if (quantity < stock) {
+        setQuantity((prev) => prev + 1);
+      } else {
+        toast.info(`Only ${stock} pieces available in stock`);
+      }
     } else {
       if (quantity > 1) {
         setQuantity((prev) => prev - 1);
@@ -40,16 +46,38 @@ const ProductInteraction = ({
   };
 
   const handleAddToCart = () => {
+    if (stock === 0) {
+      toast.error("This product is currently out of stock!");
+      return;
+    }
     addToCart({
       ...product,
       quantity,
       selectedColor,
       selectedSize,
     });
-    toast.success("Product added to cart")
+    toast.success("Product added to cart");
   };
+
   return (
     <div className="flex flex-col gap-4 mt-4">
+      {/* STOCK STATUS BADGE */}
+      <div>
+        {stock === 0 ? (
+          <span className="inline-block bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-md border border-red-200">
+            Out of Stock (0 pieces)
+          </span>
+        ) : stock <= 5 ? (
+          <span className="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md border border-amber-200">
+            Hurry! Only {stock} piece(s) left in stock
+          </span>
+        ) : (
+          <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-md border border-emerald-200">
+            In Stock ({stock} available)
+          </span>
+        )}
+      </div>
+
       {/* SIZE */}
       <div className="flex flex-col gap-2 text-xs">
         <span className="text-gray-500">Size</span>
@@ -97,14 +125,16 @@ const ProductInteraction = ({
         <span className="text-gray-500">Quantity</span>
         <div className="flex items-center gap-2">
           <button
-            className="cursor-pointer border-1 border-gray-300 p-1"
+            disabled={stock === 0 || quantity <= 1}
+            className="cursor-pointer border-1 border-gray-300 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => handleQuantityChange("decrement")}
           >
             <Minus className="w-4 h-4" />
           </button>
-          <span>{quantity}</span>
+          <span>{stock === 0 ? 0 : quantity}</span>
           <button
-            className="cursor-pointer border-1 border-gray-300 p-1"
+            disabled={stock === 0 || quantity >= stock}
+            className="cursor-pointer border-1 border-gray-300 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => handleQuantityChange("increment")}
           >
             <Plus className="w-4 h-4" />
@@ -114,14 +144,15 @@ const ProductInteraction = ({
       {/* BUTTONS */}
       <button
         onClick={handleAddToCart}
-        className="bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg flex items-center justify-center gap-2 cursor-pointer text-sm font-medium"
+        disabled={stock === 0}
+        className={`px-4 py-2.5 rounded-md shadow-lg flex items-center justify-center gap-2 text-sm font-medium transition-all ${
+          stock === 0
+            ? "bg-gray-200 text-gray-500 cursor-not-allowed shadow-none"
+            : "bg-black hover:bg-gray-800 text-white cursor-pointer"
+        }`}
       >
         <Plus className="w-4 h-4" />
-        Add to Cart
-      </button>
-      <button className="ring-1 ring-gray-400 shadow-lg text-gray-800 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer gap-2 text-sm font-medium">
-        <ShoppingCart className="w-4 h-4" />
-        Buy this Item
+        {stock === 0 ? "Out of Stock" : "Add to Cart"}
       </button>
     </div>
   );

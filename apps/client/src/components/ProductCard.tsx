@@ -43,17 +43,24 @@ const ProductCard = ({ product }: { product: ProductType }) => {
     (product.images as Record<string, string>)?.[productTypes.color] ||
     Object.values((product.images as Record<string, string>) || {})[0];
 
+  const stock = product.stock ?? 10;
+
   return (
-    <div className="shadow-lg rounded-lg overflow-hidden">
+    <div className="shadow-lg rounded-lg overflow-hidden relative">
       {/* IMAGE */}
       <Link href={`/products/${product.id}`}>
         <div className="relative aspect-[2/3] bg-gray-100 flex items-center justify-center">
+          {stock === 0 && (
+            <div className="absolute top-2 left-2 z-10 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm">
+              Out of Stock
+            </div>
+          )}
           {imageUrl ? (
             <Image
               src={imageUrl}
               alt={product.name}
               fill
-              className="object-cover hover:scale-105 transition-all duration-300"
+              className={`object-cover hover:scale-105 transition-all duration-300 ${stock === 0 ? "opacity-60 grayscale-[30%]" : ""}`}
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-gray-400 gap-1.5 p-4 text-center">
@@ -65,7 +72,12 @@ const ProductCard = ({ product }: { product: ProductType }) => {
       </Link>
       {/* PRODUCT DETAIL */}
       <div className="flex flex-col gap-4 p-4">
-        <h1 className="font-medium">{product.name}</h1>
+        <div>
+          <h1 className="font-medium">{product.name}</h1>
+          {stock > 0 && stock <= 5 && (
+            <span className="text-[11px] font-semibold text-amber-600">Only {stock} left in stock!</span>
+          )}
+        </div>
         <p className="text-sm text-gray-500">{product.shortDescription}</p>
         {/* PRODUCT TYPES */}
         <div className="flex items-center gap-4 text-xs">
@@ -117,10 +129,15 @@ const ProductCard = ({ product }: { product: ProductType }) => {
           <p className="font-medium">Rs. {product.price.toFixed(2)}</p>
           <button
             onClick={handleAddToCart}
-            className="ring-1 ring-gray-200 shadow-lg rounded-md px-2 py-1 text-sm cursor-pointer hover:text-white hover:bg-black transition-all duration-300 flex items-center gap-2"
+            disabled={stock === 0}
+            className={`ring-1 ring-gray-200 shadow-lg rounded-md px-2.5 py-1 text-xs sm:text-sm font-medium transition-all duration-300 flex items-center gap-2 ${
+              stock === 0
+                ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-75 shadow-none"
+                : "cursor-pointer hover:text-white hover:bg-black"
+            }`}
           >
             <ShoppingCart className="w-4 h-4" />
-            Add to Cart
+            {stock === 0 ? "Out of Stock" : "Add to Cart"}
           </button>
         </div>
       </div>

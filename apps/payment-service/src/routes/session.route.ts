@@ -125,6 +125,20 @@ sessionRoute.post("/verify-payment", shouldBeUser, async (c) => {
     }
   }
 
+  // 3. Decrement stock for purchased items in product-service
+  try {
+    const productServiceUrl = process.env.PRODUCT_SERVICE_URL || "http://localhost:8000";
+    await fetch(`${productServiceUrl}/products/reduce-stock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: cart.map((item) => ({ id: item.id, quantity: item.quantity })),
+      }),
+    });
+  } catch (stockErr) {
+    console.error("Error reducing product stock after payment:", stockErr);
+  }
+
   return c.json({
     status: "success",
     paymentId: razorpay_payment_id,

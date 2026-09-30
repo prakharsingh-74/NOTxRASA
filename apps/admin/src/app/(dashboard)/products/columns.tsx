@@ -176,6 +176,24 @@ export const columns: ColumnDef<ProductType>[] = [
     header: "Description",
   },
   {
+    accessorKey: "stock",
+    header: "Stock (Pieces)",
+    cell: ({ row }) => {
+      const stock = row.original.stock ?? 0;
+      return (
+        <span
+          className={`font-semibold px-2 py-1 rounded-md text-xs ${
+            stock > 0
+              ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+              : "bg-red-500/10 text-red-500 border border-red-500/20"
+          }`}
+        >
+          {stock > 0 ? `${stock} pcs` : "0 (Out of stock)"}
+        </span>
+      );
+    },
+  },
+  {
     id: "actions",
     cell: ({ row }) => <ActionCell product={row.original} />,
   },

@@ -17,6 +17,7 @@ model Product {
   sizes            String[]
   colors           String[]
   images           Json
+  stock            Int      @default(10)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   categorySlug     String
