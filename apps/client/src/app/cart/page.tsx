@@ -4,8 +4,8 @@ import { Suspense, useState } from "react";
 import ShippingForm from "@/components/ShippingForm";
 import RazorpayPaymentForm from "@/components/RazorpayPaymentForm";
 import useCartStore from "@/stores/cartStore";
-import { ShippingFormInputs } from "@repo/types";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { getValidImageUrl, ShippingFormInputs } from "@repo/types";
+import { ArrowRight, Package, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -76,17 +76,23 @@ const CartContent = () => {
                 {/* IMAGE AND DETAILS */}
                 <div className="flex gap-8">
                   {/* IMAGE */}
-                  <div className="relative w-32 h-32 bg-gray-50 rounded-lg overflow-hidden">
-                    <Image
-                      src={
-                        (item.images as Record<string, string>)?.[
-                          item.selectedColor
-                        ] || ""
-                      }
-                      alt={item.name}
-                      fill
-                      className="object-contain"
-                    />
+                  <div className="relative w-32 h-32 bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center">
+                    {(() => {
+                      const imgUrl = getValidImageUrl(item.images, item.selectedColor);
+                      return imgUrl ? (
+                        <Image
+                          src={imgUrl}
+                          alt={item.name}
+                          fill
+                          className="object-contain"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-gray-400 gap-1 p-2 text-center">
+                          <Package className="w-8 h-8 stroke-[1.5]" />
+                          <span className="text-[10px] text-gray-400">No image</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                   {/* ITEM DETAILS */}
                   <div className="flex flex-col justify-between">

@@ -1,7 +1,7 @@
 "use client";
 
 import useCartStore from "@/stores/cartStore";
-import { ProductType } from "@repo/types";
+import { getValidImageUrl, ProductType } from "@repo/types";
 import { Package, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,9 +39,7 @@ const ProductCard = ({ product }: { product: ProductType }) => {
     toast.success("Product added to cart")
   };
 
-  const imageUrl =
-    (product.images as Record<string, string>)?.[productTypes.color] ||
-    Object.values((product.images as Record<string, string>) || {})[0];
+  const imageUrl = getValidImageUrl(product.images, productTypes.color);
 
   const stock = product.stock ?? 10;
 

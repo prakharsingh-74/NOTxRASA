@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { OrderType, ProductsType } from "@repo/types";
+import { getValidImageUrl, OrderType, ProductsType } from "@repo/types";
 import { auth } from "@clerk/nextjs/server";
 import { Package } from "lucide-react";
 
@@ -50,9 +50,7 @@ const CardList = async ({ title }: { title: string }) => {
       <div className="flex flex-col gap-2">
         {title === "Popular Products"
           ? safeProducts.map((item) => {
-              const imageUrl =
-                Object.values((item.images as Record<string, string>) || {})[0] ||
-                "";
+              const imageUrl = getValidImageUrl(item.images);
 
               return (
                 <Card

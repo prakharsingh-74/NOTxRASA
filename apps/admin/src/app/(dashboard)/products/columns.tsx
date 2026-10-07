@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ProductType } from "@repo/types";
+import { getValidImageUrl, ProductType } from "@repo/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal, Package, Trash2 } from "lucide-react";
 import Image from "next/image";
@@ -125,9 +125,7 @@ export const columns: ColumnDef<ProductType>[] = [
     header: "Image",
     cell: ({ row }) => {
       const product = row.original;
-      const imageUrl =
-        (product.images as Record<string, string>)?.[product.colors[0] || ""] ||
-        Object.values((product.images as Record<string, string>) || {})[0];
+      const imageUrl = getValidImageUrl(product.images, product.colors[0]);
 
       if (!imageUrl) {
         return (

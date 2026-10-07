@@ -77,19 +77,26 @@ export const ProductFormSchema = z
     colors: z
       .array(z.enum(colors))
       .min(1, { message: "At least one color is required!" }),
-    images: z.record(z.string(), z.string(), {
-      message: "Image for each color is required!",
-    }),
+    images: z.record(
+      z.string(),
+      z.union([z.string(), z.array(z.string())]),
+      {
+        message: "Image for each color is required!",
+      }
+    ),
   })
   .refine(
     (data) => {
-      const missingImages = data.colors.filter(
-        (color: string) => !data.images?.[color]
-      );
+      const missingImages = data.colors.filter((color: string) => {
+        const val = data.images?.[color];
+        if (!val) return true;
+        if (Array.isArray(val) && val.length === 0) return true;
+        return false;
+      });
       return missingImages.length === 0;
     },
     {
-      message: "Image is required for each selected color!",
+      message: "At least one image is required for each selected color!",
       path: ["images"],
     }
   );
@@ -104,3 +111,41 @@ export const CategoryFormSchema = z.object({
     .string({ message: "Slug is Required!" })
     .min(1, { message: "Slug is Required!" }),
 });
+
+export function getValidImageUrl(images: any, color?: string): string | null {
+  if (!images) return null;
+
+  if (typeof images === "string") {
+    const trimmed = images.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+
+  if (typeof images === "object") {
+    let targetVal: any = undefined;
+
+    if (!Array.isArray(images)) {
+      if (color && images[color] !== undefined) {
+        targetVal = images[color];
+      } else {
+        const values = Object.values(images);
+        targetVal = values.length > 0 ? values[0] : undefined;
+      }
+    } else {
+      targetVal = images;
+    }
+
+    if (typeof targetVal === "string") {
+      const trimmed = targetVal.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+
+    if (Array.isArray(targetVal)) {
+      const found = targetVal.find(
+        (item) => typeof item === "string" && item.trim().length > 0
+      );
+      return found ? (found as string).trim() : null;
+    }
+  }
+
+  return null;
+}

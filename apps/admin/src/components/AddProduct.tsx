@@ -35,6 +35,7 @@ import { CategoryType, colors, ProductFormSchema, sizes } from "@repo/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useAuth } from "@clerk/nextjs";
+import { X, Loader2 } from "lucide-react";
 
 // const categories = [
 //   "T-shirts",
@@ -361,95 +362,189 @@ const AddProduct = () => {
                   name="images"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Images</FormLabel>
+                      <FormLabel>Product Images (Multiple allowed per color)</FormLabel>
                       <FormControl>
-                        <div className="">
+                        <div className="space-y-6">
+                          {form.watch("colors")?.length === 0 && (
+                            <p className="text-xs text-muted-foreground italic">
+                              Select colors above to upload images for each variant.
+                            </p>
+                          )}
                           {form.watch("colors")?.map((color) => {
                             const imagesMap = form.watch("images") || {};
-                            const imageUrl = imagesMap[color];
+                            const rawImages = imagesMap[color];
+                            const colorImages: string[] = Array.isArray(rawImages)
+                              ? rawImages
+                              : rawImages
+                              ? [rawImages]
+                              : [];
                             const isUploading = uploadingColor === color;
+
+                            const removeImage = (indexToRemove: number) => {
+                              const updated = colorImages.filter(
+                                (_, idx) => idx !== indexToRemove
+                              );
+                              const currentMap = form.getValues("images") || {};
+                              form.setValue(
+                                "images",
+                                {
+                                  ...currentMap,
+                                  [color]: updated,
+                                },
+                                { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+                              );
+                            };
 
                             return (
                               <div
-                                className="mb-4 flex items-center gap-4"
+                                className="p-3 border border-border rounded-lg bg-secondary/20 space-y-3"
                                 key={color}
                               >
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className="w-4 h-4 rounded-full"
-                                    style={{ backgroundColor: color }}
-                                  />
-                                  <span className="text-sm font-medium min-w-[80px]">
-                                    {color}:
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className="w-4 h-4 rounded-full border border-gray-300 shadow-sm"
+                                      style={{ backgroundColor: color }}
+                                    />
+                                    <span className="text-sm font-semibold capitalize">
+                                      {color} Variant
+                                    </span>
+                                  </div>
+                                  <span className="text-xs font-medium text-muted-foreground">
+                                    {colorImages.length} {colorImages.length === 1 ? "image" : "images"} uploaded
                                   </span>
                                 </div>
-                                <Input
-                                  type="file"
-                                  accept="image/*"
-                                  disabled={isUploading}
-                                  onChange={async (e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
+
+                                <div className="flex items-center gap-3">
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    disabled={isUploading}
+                                    onChange={async (e) => {
+                                      const files = Array.from(e.target.files || []);
+                                      if (files.length === 0) return;
+
                                       setUploadingColor(color);
                                       try {
-                                        const formData = new FormData();
-                                        formData.append("file", file);
-                                        formData.append(
-                                          "upload_preset",
-                                          "NOTxRASA"
-                                        );
-
-                                        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+                                        const cloudName =
+                                          process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
                                         if (!cloudName) {
-                                          throw new Error("Cloudinary cloud name is missing in environment!");
+                                          throw new Error(
+                                            "Cloudinary cloud name is missing in environment!"
+                                          );
                                         }
 
-                                        const res = await fetch(
-                                          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-                                          {
-                                            method: "POST",
-                                            body: formData,
-                                          }
-                                        );
-                                        const data = await res.json();
+                                        const newUrls: string[] = [];
 
-                                        if (data.secure_url) {
-                                          const currentImages = form.getValues("images") || {};
+                                        for (const file of files) {
+                                          const formData = new FormData();
+                                          formData.append("file", file);
+                                          formData.append(
+                                            "upload_preset",
+                                            "NOTxRASA"
+                                          );
+
+                                          const res = await fetch(
+                                            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                                            {
+                                              method: "POST",
+                                              body: formData,
+                                            }
+                                          );
+                                          const data = await res.json();
+
+                                          if (data.secure_url) {
+                                            newUrls.push(data.secure_url);
+                                          } else {
+                                            console.warn("Cloudinary upload error:", data);
+                                            toast.error(
+                                              data.error?.message ||
+                                                "Upload failed for file " + file.name
+                                            );
+                                          }
+                                        }
+
+                                        if (newUrls.length > 0) {
+                                          const currentMap =
+                                            form.getValues("images") || {};
+                                          const existingList = Array.isArray(
+                                            currentMap[color]
+                                          )
+                                            ? (currentMap[color] as string[])
+                                            : currentMap[color]
+                                            ? [currentMap[color] as string]
+                                            : [];
+                                          const updatedList = [
+                                            ...existingList,
+                                            ...newUrls,
+                                          ];
+
                                           form.setValue(
                                             "images",
                                             {
-                                              ...currentImages,
-                                              [color]: data.secure_url,
+                                              ...currentMap,
+                                              [color]: updatedList,
                                             },
-                                            { shouldValidate: true, shouldDirty: true, shouldTouch: true }
+                                            {
+                                              shouldValidate: true,
+                                              shouldDirty: true,
+                                              shouldTouch: true,
+                                            }
                                           );
-                                          toast.success(`Image uploaded for ${color}`);
-                                        } else {
-                                          console.warn("Cloudinary upload failed:", data);
-                                          toast.error(
-                                            data.error?.message || "Upload preset 'ecommerce' not found or unsigned uploads disabled on Cloudinary."
+                                          toast.success(
+                                            `Uploaded ${newUrls.length} image(s) for ${color}`
                                           );
                                         }
                                       } catch (error: any) {
                                         console.error(error);
-                                        toast.error(error.message || "Upload failed!");
+                                        toast.error(
+                                          error.message || "Upload failed!"
+                                        );
                                       } finally {
                                         setUploadingColor(null);
+                                        e.target.value = "";
                                       }
-                                    }
-                                  }}
-                                />
-                                {isUploading ? (
-                                  <span className="text-blue-600 text-sm animate-pulse">
-                                    Uploading...
-                                  </span>
-                                ) : imageUrl ? (
-                                  <span className="text-green-600 text-sm font-medium">
-                                    ✓ Image selected
-                                  </span>
-                                ) : (
-                                  <span className="text-red-600 text-sm font-medium">
-                                    Image required
+                                    }}
+                                  />
+                                </div>
+
+                                {isUploading && (
+                                  <div className="flex items-center gap-2 text-xs text-blue-600 font-medium">
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    Uploading images for {color}...
+                                  </div>
+                                )}
+
+                                {/* THUMBNAILS GRID */}
+                                {colorImages.length > 0 && (
+                                  <div className="grid grid-cols-4 gap-2 pt-1">
+                                    {colorImages.map((url, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="relative group w-full aspect-square rounded-md overflow-hidden border border-border bg-background"
+                                      >
+                                        <img
+                                          src={url}
+                                          alt={`${color} preview ${idx + 1}`}
+                                          className="w-full h-full object-cover"
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => removeImage(idx)}
+                                          className="absolute top-1 right-1 bg-black/70 hover:bg-red-600 text-white p-1 rounded-full opacity-80 hover:opacity-100 transition-all cursor-pointer"
+                                          title="Remove image"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {colorImages.length === 0 && !isUploading && (
+                                  <span className="text-xs text-red-500 font-medium block">
+                                    At least 1 image is required for {color}
                                   </span>
                                 )}
                               </div>
@@ -457,6 +552,7 @@ const AddProduct = () => {
                           })}
                         </div>
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

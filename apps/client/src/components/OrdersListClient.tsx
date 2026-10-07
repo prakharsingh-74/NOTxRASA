@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { OrderType } from "@repo/types";
+import { getValidImageUrl, OrderType } from "@repo/types";
 import Link from "next/link";
 import {
   Package,
@@ -277,13 +277,9 @@ export default function OrdersListClient({ orders }: { orders: OrderType[] }) {
                       <div className="flex-1 space-y-4">
                         {order.products?.map((product, idx) => {
                           const productImage =
-                            (product as any).image ||
-                            (product as any).img ||
-                            (typeof (product as any).images === "string"
-                              ? (product as any).images
-                              : (product as any).images
-                              ? Object.values((product as any).images)[0]
-                              : "");
+                            getValidImageUrl((product as any).image) ||
+                            getValidImageUrl((product as any).img) ||
+                            getValidImageUrl((product as any).images);
 
                           return (
                             <div
