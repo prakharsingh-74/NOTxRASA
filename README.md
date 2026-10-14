@@ -1,4 +1,4 @@
-# 🚀 Event-Driven Microservices E-Commerce Platform (Turborepo)
+# E-Commerce Platform (NOTxRASA)
 
 A premium, production-grade, asynchronous e-commerce platform built as a monorepo utilizing a microservices architecture. The system leverages **Next.js** for frontend applications, diverse Node.js frameworks (**Express**, **Fastify**, **Hono**) for backend microservices, **Apache Kafka** for event-driven messaging, and **PostgreSQL** & **MongoDB** for persistent storage.
 
@@ -31,7 +31,7 @@ graph TD
     Postgres[("PostgreSQL (Product DB)")]
     Mongo[("MongoDB (Order DB)")]
     Clerk["Clerk Auth"]
-    Stripe["Stripe Payments"]
+    Razorpay["Razorpay Payments"]
     Cloudinary["Cloudinary CDN"]
     Gmail["Gmail SMTP"]
   end
@@ -55,7 +55,7 @@ graph TD
   Product -- "Publishes: product.created / product.deleted" --> Kafka
   
   %% Payment Service
-  Payment --> Stripe
+  Payment --> Razorpay
   Payment -- "Publishes: payment.successful" --> Kafka
   Kafka -- "Subscribes: product.*" --> Payment
 
@@ -71,11 +71,11 @@ graph TD
 
 ### 🔄 Choreography Event Flows
 1. **User Sign Up / Sync**: When a user is registered or updated, the **Auth Service** handles synchronization and publishes a `user.created` event to Kafka. The **Email Service** consumes this event and dispatches a welcome email.
-2. **Product Catalog Sync**: When an Administrator creates a new product in the **Admin Panel**, the **Product Service** persists it in the PostgreSQL database and emits a `product.created` event. The **Payment Service** listens to this event to automatically create a corresponding product and price catalog entry inside **Stripe**.
+2. **Product Catalog Sync**: When an Administrator creates a new product in the **Admin Panel**, the **Product Service** persists it in the PostgreSQL database and emits a `product.created` event. The **Payment Service** listens to this event to automatically create a corresponding product and price catalog entry inside **Razorpay**.
 3. **Asynchronous Order Processing**:
-   - The user selects products in the **Client App** and initiates Stripe checkout.
-   - The **Payment Service** creates a Stripe checkout session.
-   - Upon successful payment, Stripe sends a webhook to the **Payment Service**, which verifies the signature and publishes a `payment.successful` event to Kafka.
+   - The user selects products in the **Client App** and initiates Razorpay checkout.
+   - The **Payment Service** creates a Razorpay checkout session.
+   - Upon successful payment, Razorpay sends a webhook to the **Payment Service**, which verifies the signature and publishes a `payment.successful` event to Kafka.
    - The **Order Service** consumes the `payment.successful` event, stores the order under MongoDB, and publishes an `order.created` event.
    - The **Email Service** receives `order.created` and sends a transaction confirmation mail to the customer.
 
@@ -92,7 +92,7 @@ graph TD
 | **Auth Service** | Express, `@clerk/express` | User administration & Clerk gateway |
 | **Product Service** | Express, Prisma ORM | Product & category catalog gateway |
 | **Order Service** | Fastify, `@clerk/fastify` | High-performance Order intake & retrieval API |
-| **Payment Service** | Hono, `@hono/node-server`, Stripe SDK | Stripe checkout gateway and webhooks handler |
+| **Payment Service** | Hono, `@hono/node-server`, Razorpay SDK | Razorpay checkout gateway and webhooks handler |
 | **Email Service** | Node.js, Nodemailer | Background event handler for notifications |
 | **Message Broker** | Apache Kafka (`kafkajs`) | Decoupled asynchronous event broker |
 | **Databases** | PostgreSQL & MongoDB | Microservice-isolated datastores |
@@ -109,7 +109,7 @@ notxrasa/
 │   ├── auth-service/        # Express app managing auth & user directory (Port 8003)
 │   ├── product-service/     # Express app managing product catalog (Port 8000)
 │   ├── order-service/       # Fastify app managing transactions (Port 8001)
-│   ├── payment-service/     # Hono app managing Stripe integration (Port 8002)
+│   ├── payment-service/     # Hono app managing Razorpay integration (Port 8002)
 │   └── email-service/       # Node.js background worker consumer sending emails
 ├── packages/
 │   ├── kafka/               # Shared Kafkajs wrappers and local docker-compose configuration
