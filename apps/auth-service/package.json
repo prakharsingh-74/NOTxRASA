@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "pnpm dlx tsx --env-file=.env --watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "dev": "tsx --env-file=.env --watch src/index.ts",
     "check-types": "tsc --noEmit"
   },
   "keywords": [],
@@ -15,7 +16,8 @@
     "@clerk/express": "^1.7.30",
     "cors": "^2.8.5",
     "express": "^5.0.3",
-    "@repo/kafka": "workspace:*"
+    "@repo/kafka": "workspace:*",
+    "tsx": "^4.19.3"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
