@@ -39,8 +39,8 @@ const start = async () => {
     console.warn("Kafka connection warning: Kafka cluster may not be running.", error);
   }
 
-  app.listen(8003, () => {
-    console.log("Auth service is running on port 8003");
+  app.listen(process.env.PORT || 8004, () => {
+    console.log(`Auth service is running on port ${process.env.PORT}`);
   });
 };
 
